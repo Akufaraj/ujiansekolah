@@ -69,14 +69,14 @@
     </div>
 
     <script>
-        // MASUKKAN URL APLIKASI WEB GOOGLE APPS SCRIPT KAMU DI SINI
+        // JANGAN LUPA GANTI URL INI JIKA DATABASE ADMIN SUDAH DIBUAT
         const ADMIN_DATABASE_URL = "https://script.google.com/macros/s/AKfycbxwHxx282aJNs4i_gBw848XxQ4sR1bsMIR4QmXHQxO63wHJcAlVClBJwNw_uVh-lZVK/exec";
 
         let isExamActive = false;
         let studentName = "";
         let studentClass = "";
         
-        // Deteksi apakah perangkat adalah iPhone/iPad/iOS
+        // Deteksi iOS
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
         function startExam() {
@@ -90,7 +90,6 @@
 
             let elem = document.documentElement;
             
-            // Eksekusi Fullscreen HANYA jika bukan iOS (karena iOS Safari menolak API ini untuk iframe)
             if (!isIOS) {
                 if (elem.requestFullscreen) {
                     elem.requestFullscreen().catch(err => console.log(err));
@@ -123,17 +122,28 @@
             isExamActive = false;
         }
 
-        // Trigger 1: Pindah Tab (Bekerja di Android dan iOS)
+        // Trigger 1: Pindah Tab
         document.addEventListener("visibilitychange", () => {
             if (document.hidden && isExamActive) {
                 lockExam("Membuka Aplikasi Lain / Pindah Tab");
             }
         });
 
-        // Trigger 2: Keluar Fullscreen (Hanya dijalankan di Non-iOS)
+        // Trigger 2: Keluar Fullscreen
         document.addEventListener("fullscreenchange", () => {
             if (!isIOS && !document.fullscreenElement && isExamActive) {
                 lockExam("Keluar dari Mode Layar Penuh");
+            }
+        });
+
+        // Trigger 3: Kehilangan Fokus (Split-Screen / Floating App)
+        window.addEventListener("blur", () => {
+            if (isExamActive) {
+                setTimeout(() => {
+                    if (document.hasFocus() === false) {
+                        lockExam("Membuka Split-Screen / Pop-up Aplikasi");
+                    }
+                }, 500);
             }
         });
 
