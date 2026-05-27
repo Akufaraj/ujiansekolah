@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ujian Sekolah">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/8074/8074788.png">
+
+    <title>Portal Ujian Sekolah - Safe Browser</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: #eef2f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #333; overflow: hidden; }
+        #start-screen { background: #ffffff; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; max-width: 450px; width: 90%; }
+        .school-logo { width: 100px; height: auto; margin-bottom: 20px; }
+        h1 { font-size: 24px; font-weight: 700; color: #1a202c; margin-bottom: 10px; }
+        p { font-size: 14px; line-height: 1.6; color: #64748b; margin-bottom: 25px; }
+        .input-group { text-align: left; margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 5px; }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s; }
+        .input-group input:focus { border-color: #2563eb; }
+        .btn-start { background-color: #2563eb; color: white; border: none; padding: 14px 24px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; transition: background-color 0.3s ease, transform 0.1s ease; }
+        .btn-start:hover { background-color: #1d4ed8; }
+        #exam-container { display: none; width: 100vw; height: 100vh; background: white; }
+        iframe { width: 100%; height: 100%; border: none; }
+        
+        #warning-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #111827; color: white; z-index: 9999; justify-content: center;
+            align-items: center; flex-direction: column; text-align: center; padding: 20px;
+        }
+        #warning-overlay h2 { font-size: 36px; color: #ef4444; margin-bottom: 15px; text-transform: uppercase; }
+        #warning-overlay p { color: #d1d5db; font-size: 18px; margin-bottom: 25px; max-width: 600px; }
+        .alert-box { background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 15px 30px; border-radius: 8px; color: #fca5a5; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <img src="https://cdn-icons-png.flaticon.com/512/8074/8074788.png" alt="Logo Sekolah" class="school-logo">
+        <h1>Portal Ujian Terpadu</h1>
+        <p>Sistem pengawasan ketat aktif. Masukkan identitas Anda secara benar untuk memulai ujian.</p>
+        
+        <div class="input-group">
+            <label for="student-name">Nama Lengkap</label>
+            <input type="text" id="student-name" placeholder="Masukkan nama lengkap Anda..." required>
+        </div>
+        <div class="input-group">
+            <label for="student-class">Kelas</label>
+            <input type="text" id="student-class" placeholder="Contoh: XII IPA 1 atau IX B" required>
+        </div>
+
+        <button class="btn-start" onclick="startExam()">Mulai Ujian Sekarang</button>
+    </div>
+
+    <div id="exam-container">
+        <iframe id="gform-iframe" src="https://docs.google.com/forms/d/e/1FAIpQLSd3ZHmHRLo1OCiImUc8vbk-XQ5X7-oggd_Jir7lODg-ZRxI9Q/viewform?embedded=true"></iframe>
+    </div>
+
+    <div id="warning-overlay">
+        <h2>🚨 UJIAN DIBLOKIR 🚨</h2>
+        <p>Sistem mendeteksi Anda keluar dari jendela ujian atau membuka aplikasi lain.</p>
+        <div class="alert-box">
+            Pelanggaran Anda telah dicatat. Silakan melapor ke pengawas.
+        </div>
+    </div>
+
+    <script>
+        // MASUKKAN URL APLIKASI WEB GOOGLE APPS SCRIPT KAMU DI SINI
+        const ADMIN_DATABASE_URL = "https://script.google.com/macros/s/AKfycbxwHxx282aJNs4i_gBw848XxQ4sR1bsMIR4QmXHQxO63wHJcAlVClBJwNw_uVh-lZVK/exec";
+
+        let isExamActive = false;
+        let studentName = "";
+        let studentClass = "";
+        
+        // Deteksi apakah perangkat adalah iPhone/iPad/iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+        function startExam() {
+            studentName = document.getElementById('student-name').value.trim();
+            studentClass = document.getElementById('student-class').value.trim();
+
+            if (studentName === "" || studentClass === "") {
+                alert("Mohon isi Nama dan Kelas terlebih dahulu!");
+                return;
+            }
+
+            let elem = document.documentElement;
+            
+            // Eksekusi Fullscreen HANYA jika bukan iOS (karena iOS Safari menolak API ini untuk iframe)
+            if (!isIOS) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(err => console.log(err));
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+            }
+            
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('exam-container').style.display = 'block';
+            
+            setTimeout(() => { isExamActive = true; }, 1000); 
+        }
+
+        function lockExam(reason) {
+            if (!isExamActive) return; 
+
+            document.getElementById('warning-overlay').style.display = 'flex';
+            
+            let examContainer = document.getElementById('exam-container');
+            if (examContainer) examContainer.remove(); 
+
+            if (!isIOS && document.exitFullscreen) {
+                document.exitFullscreen().catch(err => console.log(err));
+            }
+
+            logCheatToAdmin(reason);
+            isExamActive = false;
+        }
+
+        // Trigger 1: Pindah Tab (Bekerja di Android dan iOS)
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden && isExamActive) {
+                lockExam("Membuka Aplikasi Lain / Pindah Tab");
+            }
+        });
+
+        // Trigger 2: Keluar Fullscreen (Hanya dijalankan di Non-iOS)
+        document.addEventListener("fullscreenchange", () => {
+            if (!isIOS && !document.fullscreenElement && isExamActive) {
+                lockExam("Keluar dari Mode Layar Penuh");
+            }
+        });
+
+        function logCheatToAdmin(reason) {
+            if (ADMIN_DATABASE_URL === "URL_GOOGLE_APPS_SCRIPT_KAMU_DISINI") return;
+
+            const url = `${ADMIN_DATABASE_URL}?nama=${encodeURIComponent(studentName)}&kelas=${encodeURIComponent(studentClass)}&pelanggaran=${encodeURIComponent(reason)}`;
+            fetch(url, { mode: 'no-cors' })
+                .then(() => console.log("Laporan terkirim"))
+                .catch(err => console.error("Error:", err));
+        }
+    </script>
+</body>
+</html>
