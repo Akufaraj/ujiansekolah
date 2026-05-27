@@ -15,7 +15,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: #eef2f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #333; overflow: hidden; }
         
-        /* Layar Awal */
         #start-screen { background: #ffffff; padding: 40px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); text-align: center; max-width: 450px; width: 90%; }
         .school-logo { width: 100px; height: auto; margin-bottom: 20px; }
         h1 { font-size: 24px; font-weight: 700; color: #1a202c; margin-bottom: 10px; }
@@ -25,24 +24,17 @@
         .input-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s; }
         .input-group input:focus { border-color: #2563eb; }
         
-        /* Tombol Utama */
         .btn-primary { background-color: #2563eb; color: white; border: none; padding: 14px 24px; font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 10px; transition: 0.3s; }
         .btn-primary:hover { background-color: #1d4ed8; }
         
-        /* Container Ujian */
         #exam-container { display: none; width: 100vw; height: 100vh; background: white; position: relative; }
         iframe { width: 100%; height: 100%; border: none; }
         
-        /* Tombol Floating Akhiri Ujian */
         #btn-finish-floating {
-            position: absolute; bottom: 20px; right: 20px;
-            background-color: #10b981; color: white; border: none;
-            padding: 12px 24px; font-size: 15px; font-weight: 700;
-            border-radius: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-            z-index: 1000;
+            position: absolute; bottom: 20px; right: 20px; background-color: #10b981; color: white; border: none;
+            padding: 12px 24px; font-size: 15px; font-weight: 700; border-radius: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); z-index: 1000;
         }
 
-        /* Layar Gembok PIN Pengawas */
         #pin-lock-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(15, 23, 42, 0.98); color: white; z-index: 9998;
@@ -54,44 +46,49 @@
         .btn-unlock { background-color: #38bdf8; color: #0f172a; width: 100%; }
         .btn-back-exam { background-color: transparent; color: #94a3b8; border: 1px solid #64748b; margin-top: 15px; }
 
-        /* Layar Peringatan Kecurangan */
         #warning-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #111827; color: white; z-index: 9999; justify-content: center;
             align-items: center; flex-direction: column; text-align: center; padding: 20px;
         }
-        #warning-overlay h2 { font-size: 36px; color: #ef4444; margin-bottom: 15px; text-transform: uppercase; }
+        #warning-overlay h2 { font-size: 36px; color: #ef4444; margin-bottom: 15px; text-transform: uppercase; animation: blink 1s infinite; }
+        
+        /* Animasi teks berkedip untuk efek panik */
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+        
         .alert-box { background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 15px 30px; border-radius: 8px; color: #fca5a5; font-weight: 600; margin-top: 20px; }
     </style>
 </head>
 <body>
 
+    <!-- FILE AUDIO ALARM -->
+    <!-- Saya menggunakan link suara alarm standar. Kamu bisa menggantinya dengan link file mp3 milikmu sendiri -->
+    <audio id="cheat-alarm" src="https://assets.mixkit.co/active_storage/sfx/995/995-preview.mp3" loop preload="auto"></audio>
+
     <div id="start-screen">
         <img src="https://cdn-icons-png.flaticon.com/512/8074/8074788.png" alt="Logo Sekolah" class="school-logo">
         <h1>Portal Ujian Terpadu</h1>
-        <p>Sistem pengawasan ketat aktif. Masukkan identitas Anda untuk memulai.</p>
+        <p>Sistem pengawasan ketat aktif. Pastikan volume HP Anda menyala.</p>
         
         <div class="input-group">
             <label>Nama Lengkap</label>
-            <input type="text" id="student-name" placeholder="Nama Lengkap" required>
+            <input type="text" id="student-name" placeholder="Nama..." required>
         </div>
         <div class="input-group">
             <label>Kelas</label>
-            <input type="text" id="student-class" placeholder="Kelas" required>
+            <input type="text" id="student-class" placeholder="Kelas..." required>
         </div>
         <button class="btn-primary" onclick="startExam()">Mulai Ujian Sekarang</button>
     </div>
 
     <div id="exam-container">
         <iframe id="gform-iframe" src="https://docs.google.com/forms/d/e/1FAIpQLSd3ZHmHRLo1OCiImUc8vbk-XQ5X7-oggd_Jir7lODg-ZRxI9Q/viewform?embedded=true"></iframe>
-        
         <button id="btn-finish-floating" onclick="requestFinish()">Selesai Ujian & Kunci Layar</button>
     </div>
 
     <div id="pin-lock-overlay">
         <h2>🔒 Ujian Selesai</h2>
-        <p style="color: #94a3b8; margin-bottom: 20px;">Layar terkunci. Silakan panggil pengawas untuk memverifikasi dan membuka kunci perangkat Anda.</p>
-        
+        <p style="color: #94a3b8; margin-bottom: 20px;">Layar terkunci. Silakan panggil pengawas untuk memverifikasi dan membuka kunci.</p>
         <div class="pin-box">
             <label style="color: #cbd5e1; font-size: 14px;">PIN PENGAWAS</label>
             <input type="password" id="supervisor-pin" class="pin-input" placeholder="••••">
@@ -101,24 +98,22 @@
     </div>
 
     <div id="warning-overlay">
-        <h2>🚨 UJIAN DIBLOKIR 🚨</h2>
+        <h2>🚨 PELANGGARAN! 🚨</h2>
         <p>Sistem mendeteksi Anda mencoba keluar aplikasi.</p>
-        <div class="alert-box">Pelanggaran Anda telah dicatat. Silakan melapor ke pengawas.</div>
+        <div class="alert-box">Alarm telah dibunyikan. Silakan melapor ke pengawas!</div>
     </div>
 
     <script>
-        // KONFIGURASI SISTEM
         const ADMIN_DATABASE_URL = "https://script.google.com/macros/s/AKfycbxwHxx282aJNs4i_gBw848XxQ4sR1bsMIR4QmXHQxO63wHJcAlVClBJwNw_uVh-lZVK/exec";
-        const SUPERVISOR_PIN = "8899"; // Ganti angka ini dengan PIN rahasia abangmu
+        const SUPERVISOR_PIN = "8899"; 
 
         let isExamActive = false;
-        let isLockedForPin = false; // Status baru untuk mengecek apakah siswa di layar Gembok
+        let isLockedForPin = false; 
         let studentName = "";
         let studentClass = "";
         
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-        // 1. MEMULAI UJIAN
         function startExam() {
             studentName = document.getElementById('student-name').value.trim();
             studentClass = document.getElementById('student-class').value.trim();
@@ -127,6 +122,11 @@
                 alert("Mohon isi Nama dan Kelas!");
                 return;
             }
+
+            // --- TRIK MEMBUKA KUNCI AUDIO ---
+            let alarm = document.getElementById('cheat-alarm');
+            alarm.play().then(() => { alarm.pause(); }).catch(e => console.log("Audio siap diputar"));
+            // -------------------------------
 
             let elem = document.documentElement;
             if (!isIOS) {
@@ -141,57 +141,54 @@
             setTimeout(() => { isExamActive = true; }, 1000); 
         }
 
-        // 2. SISWA MENEKAN TOMBOL SELESAI
         function requestFinish() {
-            // Sembunyikan form ujian, munculkan layar gembok
             document.getElementById('exam-container').style.display = 'none';
             document.getElementById('pin-lock-overlay').style.display = 'flex';
             isLockedForPin = true; 
-            // isExamActive tetap true agar deteksi cheat tetap berjalan di latar belakang!
         }
 
-        // 3. BATAL DAN KEMBALI KE SOAL
         function returnToExam() {
             document.getElementById('pin-lock-overlay').style.display = 'none';
             document.getElementById('exam-container').style.display = 'block';
-            document.getElementById('supervisor-pin').value = ""; // Bersihkan kolom PIN
+            document.getElementById('supervisor-pin').value = ""; 
             isLockedForPin = false;
         }
 
-        // 4. PENGAWAS MEMASUKKAN PIN
         function verifyPin() {
             let inputPin = document.getElementById('supervisor-pin').value;
             
             if (inputPin === SUPERVISOR_PIN) {
-                // PIN Benar: Bebaskan siswa
-                isExamActive = false; // Matikan deteksi cheat
+                isExamActive = false; 
                 isLockedForPin = false;
                 
-                // Keluar dari fullscreen
-                if (!isIOS && document.exitFullscreen) {
-                    document.exitFullscreen().catch(err => console.log(err));
-                }
+                // MATIKAN ALARM JIKA SEDANG BUNYI
+                let alarm = document.getElementById('cheat-alarm');
+                alarm.pause();
+                alarm.currentTime = 0;
 
-                // Ubah layar gembok menjadi layar sukses
+                if (!isIOS && document.exitFullscreen) document.exitFullscreen().catch(err => console.log(err));
+
                 document.getElementById('pin-lock-overlay').innerHTML = `
                     <h2 style="color: #10b981;">✅ Selesai</h2>
                     <p style="color: #cbd5e1;">Ujian berhasil diselesaikan. Anda boleh menutup aplikasi ini.</p>
                 `;
             } else {
-                // PIN Salah
                 alert("PIN Pengawas Salah!");
                 document.getElementById('supervisor-pin').value = "";
             }
         }
 
-        // 5. EKSEKUSI BLOKIR (JIKA CURANG)
         function triggerCheatLock(reason) {
             if (!isExamActive) return; 
 
-            // Hapus layar ujian dan gembok, ganti dengan layar merah
+            // BUNYIKAN ALARM!
+            document.getElementById('cheat-alarm').play();
+
             document.getElementById('warning-overlay').style.display = 'flex';
-            document.getElementById('exam-container').remove(); 
-            document.getElementById('pin-lock-overlay').remove(); 
+            let examCont = document.getElementById('exam-container');
+            let pinLock = document.getElementById('pin-lock-overlay');
+            if(examCont) examCont.remove(); 
+            if(pinLock) pinLock.remove(); 
 
             if (!isIOS && document.exitFullscreen) document.exitFullscreen().catch(err => console.log(err));
 
@@ -199,7 +196,6 @@
             isExamActive = false;
         }
 
-        // --- SISTEM DETEKSI KECURANGAN ---
         document.addEventListener("visibilitychange", () => {
             if (document.hidden && isExamActive) triggerCheatLock("Keluar Aplikasi / Pindah Tab");
         });
@@ -208,15 +204,15 @@
             if (!isIOS && !document.fullscreenElement && isExamActive) triggerCheatLock("Keluar Mode Layar Penuh");
         });
 
-        window.addEventListener("blur", () => {
+        // Patroli Agresif Anti Split-Screen (Setiap 1.5 detik)
+        setInterval(() => {
             if (isExamActive) {
-                setTimeout(() => {
-                    if (document.hasFocus() === false) triggerCheatLock("Membuka Layar Belah / Aplikasi Pop-up");
-                }, 500);
+                if (!document.hasFocus()) {
+                    triggerCheatLock("Membuka Layar Belah / Notifikasi");
+                }
             }
-        });
+        }, 1500);
 
-        // 6. LAPOR KE GOOGLE SHEETS
         function logCheatToAdmin(reason) {
             if (ADMIN_DATABASE_URL === "URL_GOOGLE_APPS_SCRIPT_KAMU_DISINI") return;
             const url = `${ADMIN_DATABASE_URL}?nama=${encodeURIComponent(studentName)}&kelas=${encodeURIComponent(studentClass)}&pelanggaran=${encodeURIComponent(reason)}`;
